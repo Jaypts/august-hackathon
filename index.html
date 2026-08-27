@@ -1,0 +1,446 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>August Hackathon Control Center</title>
+    <style>
+      :root {
+        --bg: #070b18;
+        --panel: #121936;
+        --soft: #1d2750;
+        --text: #e8ecff;
+        --muted: #a7b0d6;
+        --accent: #6f8bff;
+        --ok: #2cc88a;
+        --warn: #ffb020;
+        --danger: #ff5f70;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        font-family: Inter, "Segoe UI", sans-serif;
+        color: var(--text);
+        background: radial-gradient(circle at top right, #172454 0%, var(--bg) 45%);
+        min-height: 100vh;
+      }
+
+      .container {
+        width: min(1100px, 94vw);
+        margin: 2rem auto;
+      }
+
+      h1,
+      h2,
+      h3,
+      p {
+        margin: 0;
+      }
+
+      .hero,
+      .card {
+        background: linear-gradient(180deg, rgba(255, 255, 255, 0.03), transparent), var(--panel);
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        border-radius: 16px;
+      }
+
+      .hero {
+        padding: 1.25rem;
+        display: grid;
+        gap: 1rem;
+      }
+
+      .hero-top {
+        display: flex;
+        justify-content: space-between;
+        gap: 1rem;
+        align-items: center;
+      }
+
+      .pill {
+        border: 1px solid rgba(255, 255, 255, 0.15);
+        background: #0e1430;
+        color: var(--text);
+        border-radius: 999px;
+        padding: 0.5rem 0.9rem;
+        font-size: 0.85rem;
+      }
+
+      button,
+      select,
+      input {
+        font: inherit;
+      }
+
+      button {
+        cursor: pointer;
+      }
+
+      .grid {
+        margin-top: 1rem;
+        display: grid;
+        gap: 1rem;
+        grid-template-columns: 1.2fr 1fr;
+      }
+
+      .card {
+        padding: 1rem;
+      }
+
+      .stats {
+        display: grid;
+        gap: 0.75rem;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        margin-top: 0.75rem;
+      }
+
+      .stat {
+        background: var(--soft);
+        border-radius: 12px;
+        padding: 0.8rem;
+      }
+
+      .stat b {
+        display: block;
+        margin-top: 0.25rem;
+        font-size: 1.25rem;
+      }
+
+      .muted {
+        color: var(--muted);
+      }
+
+      .tasks {
+        display: grid;
+        gap: 0.5rem;
+        margin-top: 0.75rem;
+        max-height: 300px;
+        overflow: auto;
+      }
+
+      .task-item {
+        border: 1px solid rgba(255, 255, 255, 0.09);
+        border-radius: 10px;
+        background: rgba(255, 255, 255, 0.02);
+        padding: 0.7rem;
+        display: grid;
+        grid-template-columns: auto 1fr auto auto;
+        gap: 0.6rem;
+        align-items: center;
+      }
+
+      .task-item.done .title {
+        text-decoration: line-through;
+        color: var(--muted);
+      }
+
+      .tag {
+        font-size: 0.75rem;
+        border-radius: 999px;
+        padding: 0.2rem 0.55rem;
+        border: 1px solid transparent;
+      }
+
+      .tag.high {
+        color: #ffd0d6;
+        border-color: rgba(255, 95, 112, 0.5);
+      }
+
+      .tag.medium {
+        color: #ffe0b4;
+        border-color: rgba(255, 176, 32, 0.5);
+      }
+
+      .tag.low {
+        color: #c7f4e2;
+        border-color: rgba(44, 200, 138, 0.5);
+      }
+
+      .form {
+        margin-top: 0.8rem;
+        display: grid;
+        gap: 0.6rem;
+      }
+
+      .form-row {
+        display: grid;
+        gap: 0.6rem;
+        grid-template-columns: 1fr 130px 130px;
+      }
+
+      input,
+      select {
+        background: #0c122b;
+        color: var(--text);
+        border: 1px solid rgba(255, 255, 255, 0.15);
+        border-radius: 10px;
+        padding: 0.6rem 0.7rem;
+      }
+
+      .primary {
+        background: var(--accent);
+        color: #fff;
+        border: none;
+        padding: 0.6rem 0.8rem;
+        border-radius: 10px;
+      }
+
+      .ghost {
+        background: transparent;
+        color: var(--muted);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        border-radius: 8px;
+        padding: 0.35rem 0.55rem;
+      }
+
+      .log {
+        margin-top: 0.75rem;
+        max-height: 280px;
+        overflow: auto;
+        display: grid;
+        gap: 0.5rem;
+      }
+
+      .log-item {
+        border-left: 2px solid var(--accent);
+        padding-left: 0.6rem;
+        font-size: 0.9rem;
+      }
+
+      .error {
+        color: #ffc9d0;
+        min-height: 1.2rem;
+      }
+
+      .footer {
+        margin-top: 1rem;
+        color: var(--muted);
+        text-align: center;
+        font-size: 0.85rem;
+      }
+
+      @media (max-width: 900px) {
+        .grid {
+          grid-template-columns: 1fr;
+        }
+
+        .form-row {
+          grid-template-columns: 1fr;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <section class="hero">
+        <div class="hero-top">
+          <div>
+            <h1>August Hackathon Control Center</h1>
+            <p class="muted">Single-file app with local data persistence for Netlify hosting.</p>
+          </div>
+          <button class="pill" id="resetApp">Reset App Data</button>
+        </div>
+        <div class="stats">
+          <div class="stat">
+            <span class="muted">Total Tasks</span>
+            <b id="totalCount">0</b>
+          </div>
+          <div class="stat">
+            <span class="muted">Completed</span>
+            <b id="doneCount">0</b>
+          </div>
+          <div class="stat">
+            <span class="muted">Open</span>
+            <b id="openCount">0</b>
+          </div>
+        </div>
+      </section>
+
+      <div class="grid">
+        <section class="card">
+          <h2>Task Board</h2>
+          <p class="muted">Track milestones, assign priorities, and keep shipping.</p>
+          <form class="form" id="taskForm">
+            <div class="form-row">
+              <input id="title" name="title" maxlength="100" placeholder="Task title" required />
+              <select id="priority" name="priority">
+                <option value="high">High</option>
+                <option value="medium" selected>Medium</option>
+                <option value="low">Low</option>
+              </select>
+              <button class="primary" type="submit">Add Task</button>
+            </div>
+            <div class="error" id="errorText"></div>
+          </form>
+          <div class="tasks" id="taskList"></div>
+        </section>
+
+        <section class="card">
+          <h2>Activity Log</h2>
+          <p class="muted">Recent actions in this browser session.</p>
+          <div class="log" id="activityLog"></div>
+        </section>
+      </div>
+      <div class="footer">Built as one deployable HTML file.</div>
+    </div>
+
+    <script>
+      const STORAGE_KEY = "august-hackathon-single-file-state";
+
+      const state = loadState();
+      const refs = {
+        form: document.getElementById("taskForm"),
+        title: document.getElementById("title"),
+        priority: document.getElementById("priority"),
+        error: document.getElementById("errorText"),
+        taskList: document.getElementById("taskList"),
+        totalCount: document.getElementById("totalCount"),
+        doneCount: document.getElementById("doneCount"),
+        openCount: document.getElementById("openCount"),
+        log: document.getElementById("activityLog"),
+        resetApp: document.getElementById("resetApp"),
+      };
+
+      refs.form.addEventListener("submit", onAddTask);
+      refs.resetApp.addEventListener("click", onResetData);
+
+      render();
+
+      function onAddTask(event) {
+        event.preventDefault();
+        const title = refs.title.value.trim();
+        const priority = refs.priority.value;
+
+        if (title.length < 3) {
+          refs.error.textContent = "Task title must be at least 3 characters.";
+          return;
+        }
+
+        const task = {
+          id: crypto.randomUUID(),
+          title,
+          priority,
+          done: false,
+          createdAt: new Date().toISOString(),
+        };
+
+        state.tasks.unshift(task);
+        pushLog(`Created task "${task.title}" (${task.priority}).`);
+        refs.form.reset();
+        refs.priority.value = "medium";
+        refs.error.textContent = "";
+        persist();
+        render();
+      }
+
+      function onResetData() {
+        if (!confirm("Reset all tasks and logs?")) return;
+        state.tasks = [];
+        state.logs = [];
+        pushLog("All app data reset.");
+        persist();
+        render();
+      }
+
+      function toggleTask(taskId) {
+        const task = state.tasks.find((item) => item.id === taskId);
+        if (!task) return;
+        task.done = !task.done;
+        pushLog(`${task.done ? "Completed" : "Reopened"} "${task.title}".`);
+        persist();
+        render();
+      }
+
+      function deleteTask(taskId) {
+        const task = state.tasks.find((item) => item.id === taskId);
+        state.tasks = state.tasks.filter((item) => item.id !== taskId);
+        if (task) pushLog(`Removed "${task.title}".`);
+        persist();
+        render();
+      }
+
+      function pushLog(text) {
+        state.logs.unshift({
+          id: crypto.randomUUID(),
+          text,
+          at: new Date().toLocaleString(),
+        });
+        state.logs = state.logs.slice(0, 20);
+      }
+
+      function render() {
+        refs.taskList.innerHTML = "";
+        refs.log.innerHTML = "";
+
+        for (const task of state.tasks) {
+          const row = document.createElement("article");
+          row.className = `task-item ${task.done ? "done" : ""}`;
+          row.innerHTML = `
+            <input type="checkbox" ${task.done ? "checked" : ""} aria-label="Toggle task">
+            <div>
+              <div class="title">${escapeHtml(task.title)}</div>
+              <div class="muted">${new Date(task.createdAt).toLocaleString()}</div>
+            </div>
+            <span class="tag ${task.priority}">${task.priority}</span>
+            <button class="ghost" type="button">Delete</button>
+          `;
+
+          row.querySelector('input[type="checkbox"]').addEventListener("change", () => toggleTask(task.id));
+          row.querySelector("button").addEventListener("click", () => deleteTask(task.id));
+          refs.taskList.appendChild(row);
+        }
+
+        for (const entry of state.logs) {
+          const item = document.createElement("div");
+          item.className = "log-item";
+          item.innerHTML = `<strong>${escapeHtml(entry.at)}</strong><div>${escapeHtml(entry.text)}</div>`;
+          refs.log.appendChild(item);
+        }
+
+        const done = state.tasks.filter((task) => task.done).length;
+        refs.totalCount.textContent = String(state.tasks.length);
+        refs.doneCount.textContent = String(done);
+        refs.openCount.textContent = String(state.tasks.length - done);
+      }
+
+      function persist() {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+      }
+
+      function loadState() {
+        try {
+          const saved = localStorage.getItem(STORAGE_KEY);
+          if (!saved) return getDefaultState();
+          const parsed = JSON.parse(saved);
+          if (!Array.isArray(parsed.tasks) || !Array.isArray(parsed.logs)) return getDefaultState();
+          return parsed;
+        } catch {
+          return getDefaultState();
+        }
+      }
+
+      function getDefaultState() {
+        return {
+          tasks: [
+            { id: crypto.randomUUID(), title: "Finalize project pitch deck", priority: "high", done: false, createdAt: new Date().toISOString() },
+            { id: crypto.randomUUID(), title: "Ship MVP demo workflow", priority: "medium", done: true, createdAt: new Date().toISOString() },
+          ],
+          logs: [{ id: crypto.randomUUID(), text: "App initialized with starter tasks.", at: new Date().toLocaleString() }],
+        };
+      }
+
+      function escapeHtml(value) {
+        return String(value)
+          .replaceAll("&", "&amp;")
+          .replaceAll("<", "&lt;")
+          .replaceAll(">", "&gt;")
+          .replaceAll('"', "&quot;")
+          .replaceAll("'", "&#39;");
+      }
+    </script>
+  </body>
+</html>
